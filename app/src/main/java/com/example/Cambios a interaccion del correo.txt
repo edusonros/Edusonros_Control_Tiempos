@@ -1,0 +1,169 @@
+Crear la Clase EmailSender:
+
+import java.util.Properties
+import javax.mail.Message
+import javax.mail.MessagingException
+import javax.mail.PasswordAuthentication
+import javax.mail.Session
+import javax.mail.Transport
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
+
+object EmailSender {
+
+    fun sendEmail(to: String, subject: String, body: String) {
+        val username = "your-email@gmail.com" // Reemplaza con tu correo electrónico
+        val password = "your-email-password" // Reemplaza con tu contraseña
+
+        val props = Properties()
+        props["mail.smtp.auth"] = "true"
+        props["mail.smtp.starttls.enable"] = "true"
+        props["mail.smtp.host"] = "smtp.gmail.com"
+        props["mail.smtp.port"] = "587"
+
+        val session = Session.getInstance(props,
+            object : javax.mail.Authenticator() {
+                override fun getPasswordAuthentication(): PasswordAuthentication {
+                    return PasswordAuthentication(username, password)
+                }
+            })
+
+        try {
+            val message = MimeMessage(session)
+            message.setFrom(InternetAddress(username))
+            message.setRecipients(
+                Message.RecipientType.TO,
+                InternetAddress.parse(to)
+            )
+            message.subject = subject
+            message.setText(body)
+
+            Transport.send(message)
+        } catch (e: MessagingException) {
+            throw RuntimeException(e)
+        }
+    }
+}
+
+
+Actualizar QRTrabajoScreen.kt:
+import android.os.StrictMode
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.example.composenavegacionentrepantallas.utils.EmailSender
+
+@Composable
+fun QRTrabajoScreen(navController: NavHostController) {
+    val Gray = Color(0xFFE0E0E0)
+
+    var operario by remember { mutableStateOf(0) }
+    var pedido by remember { mutableStateOf(0) }
+    var operacion by remember { mutableStateOf(0) }
+    var datosProceso by remember { mutableStateOf<String?>(null) }
+    var isSending by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val scanLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == android.app.Activity.RESULT_OK && data != null) {
+            val contents = data.getStringExtra("SCAN_RESULT")
+            if (contents != null && contents.length == 3) {
+                operario = contents.toIntOrNull() ?: 0
+                Toast.makeText(context, "Operario: $operario", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Código QR del operario incorrecto", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    val scanLauncherProceso = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == android.app.Activity.RESULT_OK && data != null) {
+            val contents = data.getStringExtra("SCAN_RESULT")
+            if (contents != null && contents.length == 9) {
+                datosProceso = contents
+                Toast.makeText(context, "Proceso: $datosProceso", Toast.LENGTH_SHORT).show()
+                if (datosProceso != null && datosProceso!!.length >= 9) {
+                    pedido = datosProceso!!.substring(0, 5).toIntOrNull() ?: 0
+                    operacion = datosProceso!!.substring(5, 9).toIntOrNull() ?: 0
+                }
+            } else {
+                Toast.makeText(context, "Código QR del proceso incorrecto", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun sendEmail() {
+        isSending = true
+
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
+        val fechaActual = LocalDate.now()
+        val horaActual = LocalTime.now()
+
+        val formatterFecha = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
+        val formatterHora = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.getDefault())
+        val fechaFormateada = fechaActual.format(formatterFecha)
+        val horaFormateada = horaActual.format(formatterHora)
+
+        val datosCorreo = "$operario;$pedido;$operacion;$fechaFormateada;$horaFormateada"
+
+        try {
+            EmailSender.sendEmail("tecnica@alotmetal.com", datosCorreo, datosCorreo)
+            Toast.makeText(context, "Correo enviado", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Error al enviar correo", Toast.LENGTH_SHORT).show()
+        } finally {
+            isSending = false
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Gray)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (isSending) {
+            CircularProgressIndicator()
+        } else {
+            Button(onClick = {
+                val options = ScanOptions()
+                options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                options.setPrompt("Escanear QR del Operario")
+                options.setCameraId(0)
+                scanLauncher.launch(Intent(context, com.journeyapps.barcodescanner.CaptureActivity::class.java))
+            }) {
+                Text(text = "Escanear QR de Operario", textAlign = TextAlign.Center)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+                val options = ScanOptions()
+                options.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                options.setPrompt("Escanear QR del Proceso")
+                options.setCameraId(0)
+                scanLauncherProceso.launch(Intent(context, com.journeyapps.barcodescanner.CaptureActivity::class.java))
+            }) {
+                Text(text = "Escanear QR de Proceso", textAlign = TextAlign.Center)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { sendEmail() }) {
+                Text(text = "Enviar Datos", textAlign = TextAlign.Center)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Operario: $operario\nProceso: $datosProceso",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+
