@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.composenavegacionentrepantallas" />
+                  <option name="mobileSdkAppId" value="1:1065497619190:android:d50ad1ffcc228d0db61ad7" />
+                  <option name="projectId" value="mi-primer-proyecto-fireb-21ff7" />
+                  <option name="projectNumber" value="1065497619190" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

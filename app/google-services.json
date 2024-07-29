@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1065497619190",
+    "project_id": "mi-primer-proyecto-fireb-21ff7",
+    "storage_bucket": "mi-primer-proyecto-fireb-21ff7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065497619190:android:d50ad1ffcc228d0db61ad7",
+        "android_client_info": {
+          "package_name": "com.example.composenavegacionentrepantallas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxMJf_Rg4rRqfKWJlyTu9rtO3waY46TDQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

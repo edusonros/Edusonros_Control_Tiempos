@@ -30,5 +30,24 @@ fun NavigationGraph(navController: NavHostController) {
         composable("configuracion") {
             ConfiguracionScreen(navController)
         }
+        composable("editar_personal") {
+            EditarPersonalScreen(navController)
+        }
+        composable("editar_operaciones_produccion") {
+            EditarOperacionesProduccionScreen(navController)
+        }
+        composable("cambiar_coordenadas_fichador") {
+            CambiarCoordenadasFichadorScreen(navController)
+        }
+        composable("cambiar_contraseña") {
+            CambiarContrasenaScreen(navController)
+        }
+        composable("anadir-operario") {
+            IngresarOperarioScreen(navController)
+        }
+        composable("anadir-operacion") {
+            IngresarOperacionScreen(navController)
+        }
     }
 }
+

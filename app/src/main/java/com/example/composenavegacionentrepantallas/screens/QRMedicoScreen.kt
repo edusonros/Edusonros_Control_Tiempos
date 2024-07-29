@@ -117,11 +117,12 @@ fun QRMedicoScreen(navController: NavHostController) {
                     Text(
                         text = "SALIDA-VUELTA\nMEDICO",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontSize = 30.sp,
+                            fontSize = 27.sp,
                             fontWeight = FontWeight.Bold
                         ),
                         textAlign = TextAlign.Center,
-                        maxLines = 2
+                        //maxLines = 2
+                        color= Color.Black
                     )
                 }
             }
